@@ -1,70 +1,126 @@
-# Getting Started with Create React App
+🖼️ SNAP Rekognition
+An intuitive React web app powered by AWS Rekognition that lets users upload images and analyze them for labels, celebrity faces, and facial attributes like smiles, glasses, and beards.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+🔍 Features
+✅ Drag & drop or click-to-select image upload
 
-In the project directory, you can run:
+✅ Real-time image preview
 
-### `npm start`
+✅ Upload validation: accepts only real PNG or JPEG files
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+✅ Uses AWS S3 pre-signed URLs to upload securely
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+✅ Calls AWS Rekognition to:
 
-### `npm test`
+Detect labels (e.g. “Orange”, “Food”)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Recognize celebrities (if any)
 
-### `npm run build`
+Identify facial features (e.g. “Smiling”, “Wearing glasses”)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+✅ Beautiful, animated UI (fade in/out, progress bars, emoji tags)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+✅ Mobile-friendly and responsive layout
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+✅ Clear error messages and loading states
 
-### `npm run eject`
+✅ Deployable via GitHub + Vercel or Netlify
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+📁 Project Structure
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+rekognition-app/
+├── public/
+│   └── SNAP.png              # Logo used in header
+├── src/
+│   ├── components/
+│   │   ├── FileUpload.tsx    # Drag/drop file input and upload logic
+│   │   └── ResultsDisplay.tsx# UI for label, celebrity, face attributes
+│   ├── App.tsx               # Main layout & upload card
+│   ├── index.tsx             # App root
+│   └── index.css             # Tailwind setup
+├── tailwind.config.js        # Custom animations and theme
+├── tsconfig.json
+└── README.md
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+⚙️ Setup Instructions
+1. Clone the Repo
+git clone https://github.com/your-username/rekognition-app.git
+cd rekognition-app
+2. Install Dependencies
+npm install
+3. Configure AWS Backends
+You’ll need two AWS Lambda functions + S3 + DynamoDB + Rekognition:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+▶️ Lambda: GenerateUploadUrl
+Purpose: Generate a pre-signed S3 PUT URL
 
-## Learn More
+Route: GET /GenerateUploadUrl
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Returns: { uploadUrl, key }
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+▶️ Lambda: ImageLabeler
+Trigger: S3 PUT (ObjectCreated)
 
-### Code Splitting
+Functionality:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Calls Rekognition
 
-### Analyzing the Bundle Size
+Saves labels, celebrities, faces to DynamoDB
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+▶️ Lambda: GetImageLabels
+Route: GET /GetImageLabels?key=...
 
-### Making a Progressive Web App
+Returns: Labels, Celebrities, Faces for a given image
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Note: Your frontend must use API Gateway to invoke these endpoints.
 
-### Advanced Configuration
+🚀 Running Locally
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+npm run dev
+Then open http://localhost:3000
 
-### Deployment
+🔒 Image Validation
+To avoid unsupported uploads, the app uses file signature sniffing:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+✅ Accepts:
 
-### `npm run build` fails to minify
+PNG (header: 89 50 4e 47 0d 0a 1a 0a)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+JPEG (header: starts with ff d8 ff)
+
+❌ Rejects renamed .avif, .webp, or other fakes
+
+🧠 Tech Stack
+Frontend	Backend	Infra
+React	AWS Lambda	S3
+Vite	AWS Rekognition	DynamoDB
+Tailwind	AWS API Gateway	IAM
+TypeScript	Node.js	Vercel (optional)
+
+📸 Example Output
+Labels: 🍊 Orange – 98%
+
+Celebrities: 🌟 LeBron James
+
+Faces: 😄 Smiling, 👓 Wearing Glasses
+
+🎨 Styling Notes
+Uses Tailwind CSS with custom fade animations:
+
+fade-in, fade-out, pulse
+
+Styled badges, confidence bars, and emojis
+
+Light, friendly design aesthetic
+
+✅ To Do / Improvements
+ Add user auth via Cognito
+
+ Export results to PDF
+
+ Add recent image history
+
+ Support GIF/WebP (conversion step)
+
+ Add voice narration for accessibility
