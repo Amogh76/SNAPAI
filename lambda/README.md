@@ -16,6 +16,8 @@ Presigned URL expires after 5 minutes
 
 Adds permissive CORS headers
 
+Capped at 100 images in the s3 bucket so I don't get charged, will empty the bucket out manually if nesseary.
+
 📁 2. ImageLabeler — Rekognition Processor (S3 Trigger)
 Purpose:
 Triggered automatically when a new image is uploaded to the S3 bucket. It uses Rekognition to:

@@ -7,6 +7,24 @@ BUCKET_NAME = 'rekognition-image-input'  # replace with your actual bucket name 
 
 def lambda_handler(event, context):
     try:
+        # ✅ Count number of images currently in the bucket
+        response = s3.list_objects_v2(Bucket=BUCKET_NAME)
+        files = response.get('Contents', [])
+        image_files = [f for f in files if f['Key'].lower().endswith(('.png', '.jpg', '.jpeg'))]
+
+        if len(image_files) >= 100:
+            return {
+                'statusCode': 403,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Methods': 'GET, PUT'
+                },
+                'body': json.dumps({
+                    'error': 'Maximum images in S3 bucket reached, come back later after it\'s emptied.'
+                })
+            }
+
         # ✅ Get content type from query string
         content_type = event['queryStringParameters'].get('contentType', 'image/png')
         print("Requested Content-Type:", content_type)
@@ -26,7 +44,6 @@ def lambda_handler(event, context):
             ExpiresIn=300
         )
 
-        # ✅ Corrected: Allow PUT requests for CORS preflight to succeed
         return {
             'statusCode': 200,
             'headers': {
@@ -44,5 +61,10 @@ def lambda_handler(event, context):
         print("ERROR:", str(e))
         return {
             'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': 'GET, PUT'
+            },
             'body': json.dumps({'error': str(e)})
         }
